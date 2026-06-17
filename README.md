@@ -2,8 +2,8 @@
 
 A production-ready REST API that fetches, analyzes, and stores GitHub user profiles using the GitHub Public API and MySQL.
 
-🚀 **Live API:** [Open API](https://github-analyzer-production-f606.up.railway.app)  
-📁 **Repository:** [GitHub Repository](https://github.com/Himanshugulhane27/github-analyzer)
+🚀 **Live API:** <https://github-analyzer-production-f606.up.railway.app>
+📁 **Repository:** <https://github.com/Himanshugulhane27/github-analyzer>
 
 ---
 
