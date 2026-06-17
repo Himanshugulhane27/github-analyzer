@@ -13,6 +13,7 @@ const app = express();
 // --------------- Middleware ---------------
 
 // Security headers
+app.set('trust proxy', 1);
 app.use(helmet());
 
 // CORS — allow all origins
