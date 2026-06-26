@@ -10,60 +10,82 @@ const pool = require('./config/db');
 
 const app = express();
 
-// --------------- Middleware ---------------
+// ================= Middleware =================
+
+// Trust Railway proxy
+app.set('trust proxy', 1);
 
 // Security headers
-app.set('trust proxy', 1);
 app.use(helmet());
 
-// CORS — allow all origins
+// Enable CORS
 app.use(cors());
 
-// Parse JSON request bodies
+// Parse JSON bodies
 app.use(express.json());
 
-// Rate limiting: 100 requests per 15 minutes per IP
+// Rate Limiter
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
-    error: 'Too many requests from this IP, please try again after 15 minutes.',
+    error: 'Too many requests from this IP. Please try again after 15 minutes.',
   },
 });
+
 app.use(limiter);
 
-// --------------- Routes ---------------
+// ================= Routes =================
 
-// Health check
-app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date() });
+// Landing Page
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    project: 'GitHub Profile Analyzer API',
+    status: 'Running',
+    version: '1.0.0',
+    description:
+      'REST API for analyzing GitHub profiles and storing insights.',
+    endpoints: {
+      health: 'GET /health',
+      analyze: 'POST /api/analyze/:username',
+      profiles: 'GET /api/profiles',
+      profile: 'GET /api/profiles/:username',
+      delete: 'DELETE /api/profiles/:username',
+    },
+  });
 });
 
-// API routes
+// Health Check
+app.get('/health', (_req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date(),
+  });
+});
+
+// API Routes
 app.use('/api', profileRoutes);
 
-// --------------- Global Error Handler ---------------
+// ================= Global Error Handler =================
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
   console.error('[GlobalErrorHandler]', err.stack || err.message);
 
-  const statusCode = err.statusCode || 500;
-  res.status(statusCode).json({
+  res.status(err.statusCode || 500).json({
     error: err.message || 'Internal Server Error',
   });
 });
 
-// --------------- Start Server ---------------
+// ================= Start Server =================
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, async () => {
   console.log(`🚀 GitHub Profile Analyzer API running on port ${PORT}`);
 
-  // Verify DB connectivity on startup
   try {
     const connection = await pool.getConnection();
     console.log('✅ MySQL database connected successfully');
@@ -71,7 +93,7 @@ app.listen(PORT, async () => {
   } catch (err) {
     console.error('❌ MySQL connection failed:', err.message);
     console.error(
-      '   Make sure your .env is configured and the database is running.'
+      'Make sure your environment variables are configured correctly.'
     );
   }
 });
